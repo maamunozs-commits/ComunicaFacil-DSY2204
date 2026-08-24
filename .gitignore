@@ -1,0 +1,21 @@
+# Android Studio / Gradle
+.gradle/
+gradle/gradle-daemon-jvm.properties
+.idea/
+local.properties
+**/build/
+captures/
+.externalNativeBuild/
+.cxx/
+.tooling/
+
+# Operating system
+.DS_Store
+Thumbs.db
+
+# Generated deliverables
+qa/
+deliverables/
+package_staging/
+scripts/
+*.apk
