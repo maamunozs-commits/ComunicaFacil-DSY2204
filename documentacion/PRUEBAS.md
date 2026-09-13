@@ -24,7 +24,7 @@ La prueba `registroAccesoRecuperacionYComunicacion` se ejecutó en el emulador m
 
 También se revisó visualmente Login a 480 × 800 y 1080 × 1920 píxeles, con densidad de 240 dpi. El contenido se ajusta al ancho y la pantalla pequeña permite desplazarse. Las imágenes están en `capturas`.
 
-`assembleDebug` y `lintDebug` terminaron correctamente. Lint no encontró errores y emitió siete advertencias: versiones más nuevas disponibles, configuración de copias de seguridad, icono de aplicación y una dependencia de prueba no utilizada. Se conservaron las versiones con las que se compiló el proyecto.
+`assembleDebug` y `lintDebug` terminaron correctamente. Lint no encontró errores y emitió siete advertencias: versiones más nuevas disponibles, configuración de copias de seguridad, icono de aplicación y sugerencia de usar una extensión KTX para SharedPreferences. Se conservaron las versiones con las que se compiló el proyecto.
 
 Una medición de inicio en frío con `adb shell am start -W` registró 1586 ms. Ese valor solo describe una ejecución del emulador.
 
