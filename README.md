@@ -6,7 +6,7 @@ Proyecto de la semana 5: Integrando Kotlin a la aplicación móvil con Android S
 - Institución: Duoc UC.
 - Carrera: Ingeniería en Desarrollo de Software.
 - Asignatura: Desarrollo de Aplicaciones Móviles, DSY2204.
-- Sección: por confirmar.
+- Sección: 001A.
 - Profesor: Miguel Puebla.
 
 La aplicación ayuda a una persona con discapacidad auditiva a comunicarse mediante mensajes escritos, texto grande y lectura en voz alta. Tiene Login, Registro, recuperación de contraseña y un historial sencillo.
