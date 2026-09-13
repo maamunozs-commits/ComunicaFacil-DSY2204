@@ -13,7 +13,7 @@ La aplicación ayuda a una persona con discapacidad auditiva a comunicarse media
 
 ## Abrir el proyecto
 
-1. Descomprimir la entrega y abrir la carpeta `proyecto` desde Android Studio.
+1. Descomprimir la entrega, descomprimir `ComunicaFacil_proyecto.zip` y abrir la carpeta `ComunicaFacil` desde Android Studio.
 2. Esperar la sincronización de Gradle y aceptar la instalación del SDK que solicite Android Studio.
 3. Usar el JDK incluido con Android Studio y un teléfono o emulador con Android 8.0 o superior.
 4. Presionar Run para instalar la aplicación.
@@ -73,23 +73,29 @@ Las pruebas se realizaron en Android 11. El reconocimiento de voz no estaba inst
 
 ## Repositorio Git
 
-La entrega incluye `ComunicaFacil.bundle`, una copia transportable del repositorio y su historial. Se puede compartir junto con el ZIP y abrir con:
+La entrega de la semana 5 est? en [GitHub, rama entrega-semana-5](https://github.com/maamunozs-commits/ComunicaFacil-DSY2204/tree/entrega-semana-5). Esta rama contiene el proyecto completo, las capturas, el APK y el informe PDF en `entrega/`.
+
+Para descargar el proyecto con su historial:
 
 ```powershell
-git clone ComunicaFacil.bundle ComunicaFacil
+git clone --branch entrega-semana-5 https://github.com/maamunozs-commits/ComunicaFacil-DSY2204.git ComunicaFacil
 cd ComunicaFacil
 git log --oneline
 ```
 
-Para trabajar una modificación en una rama:
+El archivo `ComunicaFacil_proyecto.zip` tambi?n incluye `ComunicaFacil.bundle` dentro de la carpeta del proyecto. Este archivo permite recuperar el historial sin conexi?n a GitHub. Desde la carpeta que contiene el bundle:
+
+```powershell
+git clone ComunicaFacil.bundle ComunicaFacil_con_historial
+```
+
+Para trabajar una modificaci?n en una rama:
 
 ```powershell
 git switch -c ajuste-pantallas
 git add .
 git commit -m "Ajustar pantallas"
 ```
-
-El código del ZIP se exporta con `git archive`. No se necesita una cuenta de GitHub para revisar el repositorio incluido.
 
 ## Referencias
 
