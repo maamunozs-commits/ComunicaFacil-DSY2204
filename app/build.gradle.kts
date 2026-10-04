@@ -3,6 +3,9 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose")
 }
 
+// La configuración real se descarga desde Firebase Console; nunca se inventa.
+if (file("google-services.json").exists()) apply(plugin = "com.google.gms.google-services")
+
 android {
     namespace = "cl.duoc.comunicafacil"
     compileSdk = 37
@@ -11,13 +14,26 @@ android {
         applicationId = "cl.duoc.comunicafacil"
         minSdk = 26
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 2
+        versionName = "1.1"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildFeatures {
         compose = true
+    }
+
+    val rutaFirma = providers.environmentVariable("COMUNICAFACIL_KEYSTORE").orNull
+    if (rutaFirma != null) {
+        signingConfigs {
+            create("entrega") {
+                storeFile = file(rutaFirma)
+                storePassword = providers.environmentVariable("COMUNICAFACIL_STORE_PASSWORD").get()
+                keyAlias = "comunicafacil"
+                keyPassword = providers.environmentVariable("COMUNICAFACIL_KEY_PASSWORD").get()
+            }
+        }
+        buildTypes { getByName("release") { signingConfig = signingConfigs.getByName("entrega") } }
     }
 
     compileOptions {
@@ -27,6 +43,10 @@ android {
 }
 
 dependencies {
+    implementation(platform("com.google.firebase:firebase-bom:34.3.0"))
+    implementation("com.google.firebase:firebase-auth")
+    implementation("com.google.firebase:firebase-firestore")
+    testImplementation("junit:junit:4.13.2")
     implementation(platform("androidx.compose:compose-bom:2026.08.00"))
     implementation("androidx.activity:activity-compose:1.13.0")
     implementation("androidx.compose.material3:material3")

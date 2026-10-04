@@ -1,0 +1,23 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<testsuites tests="6" failures="0" errors="0" skipped="0" time="26.395" timestamp="2026-10-04T23:20:35" hostname="localhost">
+  <testsuite name="cl.duoc.comunicafacil.BackendLocalTest" tests="5" failures="0" errors="0" skipped="0" time="0.162" timestamp="2026-10-04T23:20:35" hostname="localhost">
+    <properties>
+      <property name="device" value="S5(AVD) - 11" />
+      <property name="flavor" value="" />
+      <property name="project" value=":app" />
+    </properties>
+    <testcase name="actualizacionInvalidaNoDestruyeMensaje" classname="cl.duoc.comunicafacil.BackendLocalTest" time="0.124" />
+    <testcase name="cicloCrudYRecarga" classname="cl.duoc.comunicafacil.BackendLocalTest" time="0.004" />
+    <testcase name="limiteYBorradoCompleto" classname="cl.duoc.comunicafacil.BackendLocalTest" time="0.029" />
+    <testcase name="rechazaCrudSinSesion" classname="cl.duoc.comunicafacil.BackendLocalTest" time="0.003" />
+    <testcase name="cierreSesionConservaDatosYAislaCuentas" classname="cl.duoc.comunicafacil.BackendLocalTest" time="0.002" />
+  </testsuite>
+  <testsuite name="cl.duoc.comunicafacil.FlujoAplicacionTest" tests="1" failures="0" errors="0" skipped="0" time="24.872" timestamp="2026-10-04T23:20:35" hostname="localhost">
+    <properties>
+      <property name="device" value="S5(AVD) - 11" />
+      <property name="flavor" value="" />
+      <property name="project" value=":app" />
+    </properties>
+    <testcase name="registroAccesoRecuperacionYComunicacion" classname="cl.duoc.comunicafacil.FlujoAplicacionTest" time="24.872" />
+  </testsuite>
+</testsuites>

@@ -42,6 +42,8 @@ class FlujoAplicacionTest {
     @Test
     fun registroAccesoRecuperacionYComunicacion() {
         regla.activity.getSharedPreferences("cuentas", Context.MODE_PRIVATE).edit().clear().commit()
+        regla.activity.getSharedPreferences("sesion", Context.MODE_PRIVATE).edit().clear().commit()
+        regla.activity.getSharedPreferences("mensajes", Context.MODE_PRIVATE).edit().clear().commit()
         regla.activityRule.scenario.recreate()
         regla.waitForIdle()
         captura("01_login")
@@ -132,6 +134,14 @@ class FlujoAplicacionTest {
         escribir("clave", "Nueva123")
         pulsar("ingresar")
         pulsar("irHistorial")
+        regla.onNodeWithText("Hola, necesito ayuda para llegar a la sala.").assertExists()
+        regla.onNodeWithText("Editar").performScrollTo().performClick()
+        regla.onNodeWithTag("mensajeEditado").performTextReplacement("Mensaje editado para la semana 8.")
+        regla.onNodeWithText("Guardar", useUnmergedTree = true).performClick()
+        regla.onNodeWithText("Mensaje editado para la semana 8.").assertExists()
+        captura("08_historial_editado")
+        regla.onNodeWithText("Eliminar").performScrollTo().performClick()
+        regla.onAllNodesWithText("Eliminar").onLast().performClick()
         regla.onNodeWithText("Todavía no hay mensajes.").assertExists()
         pulsar("volverComunicar")
         regla.onNodeWithText("Necesito ayuda").performScrollTo().performClick()

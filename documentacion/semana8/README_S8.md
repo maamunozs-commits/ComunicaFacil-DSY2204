@@ -10,7 +10,7 @@ Abrir la raíz del proyecto en Android Studio, sincronizar Gradle con conexión 
 
 Crear una cuenta con nombre, correo, clave de seis caracteres o más y PIN de cuatro números. El modo local admite cinco cuentas por dispositivo; las cuentas existentes de la semana 5 se siguen leyendo. Al ingresar, escribir y pulsar Mostrar crea un mensaje. Historial permite consultar, editar, eliminar y borrar todos con confirmación. Se conservan los diez últimos mensajes por cuenta. Cerrar sesión conserva esos mensajes; el nuevo acceso los recarga. Recuperar contraseña mantiene el PIN en modo local. Las contraseñas locales siguen siendo SHA-256 para el ejercicio y no deben usarse con cuentas reales.
 
-La pantalla indica expresamente si está en modo local. Para activar el backend remoto, seguir [FIREBASE.md](documentacion/semana8/FIREBASE.md). En ese modo las cuentas se autentican con FirebaseAuth, los mensajes usan Cloud Firestore y la recuperación envía un enlace por correo. Las preferencias no contienen contraseñas, PIN ni tokens Firebase; guardan los datos básicos de sesión. Las reglas incluidas autorizan únicamente al propietario.
+La pantalla indica expresamente si está en modo local. Para activar el backend remoto, seguir [FIREBASE.md](FIREBASE.md). En ese modo las cuentas se autentican con FirebaseAuth, los mensajes usan Cloud Firestore y la recuperación envía un enlace por correo. Las preferencias no contienen contraseñas, PIN ni tokens Firebase; guardan los datos básicos de sesión. Las reglas incluidas autorizan únicamente al propietario.
 
 ## Verificar y firmar
 
@@ -21,7 +21,7 @@ La pantalla indica expresamente si está en modo local. Para activar el backend 
 
 Las pruebas instrumentadas borran los datos de las cuentas ficticias en el emulador: usar un dispositivo dedicado. La clave release y la contraseña protegida para Windows permanecen fuera del repositorio en `%USERPROFILE%\.android\comunicafacil-firma`. `firma.xml` está protegido mediante DPAPI para la cuenta Windows que lo creó. Respaldar esa carpeta de forma privada: la misma clave se requiere para las actualizaciones. El script de firma requiere esa carpeta; otros equipos deben usar su propia clave o recibir un respaldo privado. No hay contraseñas ni keystores en el ZIP ni en Git.
 
-Resultados y límites en [PRUEBAS.md](documentacion/semana8/PRUEBAS.md): 18 pruebas aprobadas y APK release instalado con firma v2 verificada. Firebase y audio físico requieren validación adicional.
+Resultados y límites en [PRUEBAS.md](PRUEBAS.md): 18 pruebas aprobadas y APK release instalado con firma v2 verificada. Firebase y audio físico requieren validación adicional.
 
 ## Distribución
 

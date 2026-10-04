@@ -1,0 +1,19 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /usuarios/{uid}/mensajes/{id} {
+      function propietario() { return request.auth != null && request.auth.uid == uid; }
+      function valido() {
+        return request.resource.data.keys().hasOnly(['texto', 'creado'])
+          && request.resource.data.texto is string
+          && request.resource.data.texto.size() > 0
+          && request.resource.data.texto.size() <= 1000
+          && request.resource.data.creado is int;
+      }
+      allow read, delete: if propietario();
+      allow create: if propietario() && valido();
+      allow update: if propietario() && valido()
+        && request.resource.data.creado == resource.data.creado;
+    }
+  }
+}

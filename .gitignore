@@ -8,3 +8,6 @@ entrega/
 *.zip
 *.bundle
 *.iml
+*.jks
+*.keystore
+app/google-services.json

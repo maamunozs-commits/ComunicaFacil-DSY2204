@@ -27,6 +27,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.util.Locale
+import com.google.firebase.FirebaseApp
 
 class MainActivity : ComponentActivity() {
     private var lector: TextToSpeech? = null
@@ -35,10 +36,10 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         lector = TextToSpeech(this) { estado -> vozLista = estado == TextToSpeech.SUCCESS }
-        val registro = RegistroUsuarios(this)
+        val backend: Backend = if (FirebaseApp.initializeApp(this) != null) BackendFirebase(this) else BackendLocal(this)
         setContent {
             MaterialTheme(colorScheme = lightColorScheme(primary = Color(0xFF245A81), background = Color.White)) {
-                Aplicacion(registro)
+                Aplicacion(backend)
             }
         }
     }
@@ -60,15 +61,41 @@ class MainActivity : ComponentActivity() {
     }
 
     @Composable
-    private fun Aplicacion(registro: RegistroUsuarios) {
-        var pantalla by rememberSaveable { mutableStateOf("Login") }
-        var correoActivo by rememberSaveable { mutableStateOf("") }
+    private fun Aplicacion(backend: Backend) {
+        var pantalla by rememberSaveable { mutableStateOf(if (backend.actual() != null) "Comunicar" else "Login") }
         var aviso by rememberSaveable { mutableStateOf("") }
         var mensaje by rememberSaveable { mutableStateOf("") }
         var idioma by rememberSaveable { mutableStateOf("Español") }
         var grande by rememberSaveable { mutableStateOf(true) }
-        var historial by rememberSaveable { mutableStateOf<List<String>>(emptyList()) }
-        val usuario = registro.usuarios.filterNotNull().find { it.correo == correoActivo }
+        var historial by remember { mutableStateOf<List<Mensaje>>(emptyList()) }
+        var ocupado by remember { mutableStateOf(false) }
+        var editar by remember { mutableStateOf<Mensaje?>(null) }
+        var quitar by remember { mutableStateOf<Mensaje?>(null) }
+        var borrarTodo by remember { mutableStateOf(false) }
+        val usuario = backend.actual()
+
+        LaunchedEffect(Unit) {
+            if (backend.actual() == null && (pantalla == "Comunicar" || pantalla == "Historial")) pantalla = "Login"
+        }
+
+        fun cargar() {
+            ocupado = true
+            backend.consultar { lista, error ->
+                ocupado = false
+                if (error != null) aviso = error else historial = lista.orEmpty()
+            }
+        }
+        fun accion(exito: String, operacion: ((String?) -> Unit) -> Unit) {
+            ocupado = true
+            operacion { error ->
+                ocupado = false
+                aviso = error ?: exito
+                if (error == null) cargar()
+            }
+        }
+        LaunchedEffect(pantalla) {
+            if (pantalla == "Comunicar" || pantalla == "Historial") cargar()
+        }
 
         fun navegar(destino: String) { pantalla = destino; aviso = "" }
 
@@ -81,7 +108,7 @@ class MainActivity : ComponentActivity() {
 
         BackHandler(pantalla != "Login") {
             if (pantalla == "Historial") navegar("Comunicar")
-            else { correoActivo = ""; mensaje = ""; historial = arrayListOf(); navegar("Login") }
+            else { backend.salir(); mensaje = ""; historial = emptyList(); navegar("Login") }
         }
 
         Surface(Modifier.fillMaxSize()) {
@@ -91,6 +118,7 @@ class MainActivity : ComponentActivity() {
                 Text("Apoyo para comunicarte con texto y voz", style = MaterialTheme.typography.bodyMedium)
                 HorizontalDivider()
                 Text(pantalla, style = MaterialTheme.typography.titleLarge)
+                if (ocupado) LinearProgressIndicator(Modifier.fillMaxWidth())
                 if (aviso.isNotEmpty()) {
                     Text(aviso, Modifier.testTag("aviso"), color = MaterialTheme.colorScheme.primary)
                 }
@@ -101,14 +129,17 @@ class MainActivity : ComponentActivity() {
                         Campo("Correo", correo, { correo = it }, "correo", tipo = KeyboardType.Email)
                         Campo("Contraseña", clave, { clave = it }, "clave", secreto = true)
                         Button(onClick = {
-                            val cuenta = registro.ingresar(correo, clave)
-                            if (cuenta == null) aviso = "Correo o contraseña incorrectos."
-                            else { correoActivo = cuenta.correo; navegar("Comunicar") }
-                        }, Modifier.fillMaxWidth().testTag("ingresar")) { Text("Ingresar") }
+                            ocupado = true
+                            backend.ingresar(correo, clave) { error ->
+                                ocupado = false
+                                if (error != null) aviso = error else navegar("Comunicar")
+                            }
+                        }, Modifier.fillMaxWidth().testTag("ingresar"), enabled = !ocupado) { Text("Ingresar") }
                         TextButton(onClick = { navegar("Registro") }, Modifier.testTag("irRegistro")) { Text("Crear cuenta") }
                         TextButton(onClick = { navegar("Recuperar contraseña") }, Modifier.testTag("irRecuperar")) { Text("Olvidé mi contraseña") }
-                        Text("Primero crea tu cuenta. Se pueden registrar hasta 5 usuarios en este dispositivo.")
-                        Text("Usuarios registrados: ${registro.usuarios.filterNotNull().size}/5", Modifier.testTag("cantidad"))
+                        Text(if (backend.remoto) "Crea tu cuenta para conservar tus mensajes y acceder desde otro dispositivo."
+                            else "Modo local de demostración. Se pueden registrar hasta 5 usuarios en este dispositivo.")
+                        if (!backend.remoto) Text("Usuarios registrados: ${RegistroUsuarios(this@MainActivity).usuarios.filterNotNull().size}/5", Modifier.testTag("cantidad"))
                     }
                     "Registro" -> {
                         var nombre by rememberSaveable { mutableStateOf("") }
@@ -119,30 +150,43 @@ class MainActivity : ComponentActivity() {
                         Campo("Nombre", nombre, { nombre = it }, "nombre")
                         Campo("Correo", correo, { correo = it }, "correo", tipo = KeyboardType.Email)
                         Campo("Contraseña (mínimo 6)", clave, { clave = it }, "clave", secreto = true)
-                        Campo("PIN de recuperación (4 números)", pin, { pin = it }, "pin", secreto = true, tipo = KeyboardType.NumberPassword)
+                        if (!backend.remoto) Campo("PIN de recuperación (4 números)", pin, { pin = it }, "pin", secreto = true, tipo = KeyboardType.NumberPassword)
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Checkbox(acepta, { acepta = it }, Modifier.testTag("acepta"))
-                            Text("Acepto guardar mi cuenta en este dispositivo.", Modifier.weight(1f))
+                            Text(if (backend.remoto) "Acepto guardar mi cuenta y mis mensajes en el servicio de la aplicación." else "Acepto guardar mi cuenta en este dispositivo.", Modifier.weight(1f))
                         }
                         Button(onClick = {
-                            aviso = if (!acepta) "Debes aceptar el almacenamiento local."
-                            else registro.registrar(nombre, correo, clave, pin) ?: ""
-                            if (aviso.isEmpty()) { navegar("Login"); aviso = "Cuenta registrada. Ya puedes ingresar." }
-                        }, Modifier.fillMaxWidth().testTag("registrar")) { Text("Registrar") }
+                            if (!acepta) aviso = if (backend.remoto) "Debes aceptar el almacenamiento de tus datos." else "Debes aceptar el almacenamiento local."
+                            else {
+                                ocupado = true
+                                backend.registrar(nombre, correo, clave, if (backend.remoto) "0000" else pin) { error ->
+                                    ocupado = false
+                                    if (error != null) aviso = error
+                                    else { navegar("Login"); aviso = "Cuenta registrada. Ya puedes ingresar." }
+                                }
+                            }
+                        }, Modifier.fillMaxWidth().testTag("registrar"), enabled = !ocupado) { Text("Registrar") }
                         TextButton(onClick = { navegar("Login") }, Modifier.testTag("volver")) { Text("Volver al Login") }
                     }
                     "Recuperar contraseña" -> {
                         var correo by rememberSaveable { mutableStateOf("") }
                         var pin by rememberSaveable { mutableStateOf("") }
                         var clave by rememberSaveable { mutableStateOf("") }
-                        Text("Ingresa el PIN que elegiste al registrarte. La contraseña se cambia en este dispositivo.")
+                        Text(if (backend.remoto) "Te enviaremos un enlace para restablecer la contraseña a tu correo."
+                            else "Ingresa el PIN que elegiste al registrarte. La contraseña se cambia en este dispositivo.")
                         Campo("Correo", correo, { correo = it }, "correo", tipo = KeyboardType.Email)
-                        Campo("PIN de recuperación", pin, { pin = it }, "pin", secreto = true, tipo = KeyboardType.NumberPassword)
-                        Campo("Nueva contraseña", clave, { clave = it }, "clave", secreto = true)
+                        if (!backend.remoto) {
+                            Campo("PIN de recuperación", pin, { pin = it }, "pin", secreto = true, tipo = KeyboardType.NumberPassword)
+                            Campo("Nueva contraseña", clave, { clave = it }, "clave", secreto = true)
+                        }
                         Button(onClick = {
-                            aviso = registro.recuperar(correo, pin, clave) ?: ""
-                            if (aviso.isEmpty()) { navegar("Login"); aviso = "Contraseña actualizada." }
-                        }, Modifier.fillMaxWidth().testTag("recuperar")) { Text("Cambiar contraseña") }
+                            ocupado = true
+                            backend.recuperar(correo, pin, clave) { error ->
+                                ocupado = false
+                                if (error != null) aviso = error
+                                else { navegar("Login"); aviso = if (backend.remoto) "Si el correo tiene una cuenta, recibirás un enlace de recuperación." else "Contraseña actualizada." }
+                            }
+                        }, Modifier.fillMaxWidth().testTag("recuperar"), enabled = !ocupado) { Text(if (backend.remoto) "Enviar enlace" else "Cambiar contraseña") }
                         TextButton(onClick = { navegar("Login") }, Modifier.testTag("volver")) { Text("Volver al Login") }
                     }
                     "Comunicar" -> {
@@ -150,9 +194,8 @@ class MainActivity : ComponentActivity() {
                         Campo("Escribe tu mensaje", mensaje, { mensaje = it }, "mensaje", variasLineas = true)
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             Button(onClick = {
-                                if (mensaje.isBlank()) aviso = "Escribe un mensaje primero."
-                                else { historial = ArrayList((historial + mensaje.trim()).takeLast(10)); aviso = "Mensaje listo para mostrar." }
-                            }, Modifier.weight(1f).testTag("mostrar")) { Text("Mostrar") }
+                                accion("Mensaje guardado y listo para mostrar.") { fin -> backend.crear(mensaje, fin) }
+                            }, Modifier.weight(1f).testTag("mostrar"), enabled = !ocupado) { Text("Mostrar") }
                             Button(onClick = { aviso = if (mensaje.isBlank()) "Escribe un mensaje primero." else hablar(mensaje, idioma) }, Modifier.weight(1f).testTag("hablar")) { Text("Hablar") }
                         }
                         OutlinedButton(onClick = {
@@ -193,28 +236,48 @@ class MainActivity : ComponentActivity() {
                         }
                         TextButton(onClick = { navegar("Historial") }, Modifier.testTag("irHistorial")) { Text("Ver historial (${historial.size})") }
                         TextButton(onClick = {
-                            correoActivo = ""; mensaje = ""; historial = arrayListOf(); navegar("Login")
-                        }, Modifier.testTag("salir")) { Text("Cerrar sesión") }
+                            backend.salir(); mensaje = ""; historial = emptyList(); navegar("Login")
+                        }, Modifier.testTag("salir"), enabled = !ocupado) { Text("Cerrar sesión") }
                     }
                     "Historial" -> {
-                        Text("Últimos 10 mensajes de esta sesión")
+                        Text("Últimos 10 mensajes guardados de tu cuenta")
                         Row(Modifier.fillMaxWidth()) {
                             Text("N.º", Modifier.width(48.dp)); Text("Mensaje", Modifier.weight(1f))
                         }
                         HorizontalDivider()
                         if (historial.isEmpty()) Text("Todavía no hay mensajes.")
-                        historial.forEachIndexed { indice, texto ->
+                        historial.forEachIndexed { indice, item ->
                             Row(Modifier.fillMaxWidth()) {
-                                Text("${indice + 1}", Modifier.width(48.dp)); Text(texto, Modifier.weight(1f))
+                                Text("${indice + 1}", Modifier.width(48.dp)); Text(item.texto, Modifier.weight(1f))
+                            }
+                            Row {
+                                TextButton(onClick = { editar = item }, Modifier.testTag("editar_${item.id}"), enabled = !ocupado) { Text("Editar") }
+                                TextButton(onClick = { quitar = item }, Modifier.testTag("eliminar_${item.id}"), enabled = !ocupado) { Text("Eliminar") }
                             }
                             HorizontalDivider()
                         }
-                        OutlinedButton(onClick = { historial = arrayListOf() }, Modifier.testTag("borrarHistorial")) { Text("Borrar historial") }
+                        OutlinedButton(onClick = { borrarTodo = true }, Modifier.testTag("borrarHistorial"), enabled = !ocupado) { Text("Borrar historial") }
                         TextButton(onClick = { navegar("Comunicar") }, Modifier.testTag("volverComunicar")) { Text("Volver a comunicar") }
                     }
                 }
             }
         }
+        editar?.let { item ->
+            var texto by remember(item.id) { mutableStateOf(item.texto) }
+            AlertDialog(onDismissRequest = { editar = null }, title = { Text("Editar mensaje") },
+                text = { Campo("Mensaje", texto, { texto = it }, "mensajeEditado", variasLineas = true) },
+                confirmButton = { TextButton(onClick = {
+                    val error = Validador.mensaje(texto)
+                    if (error != null) aviso = error else { editar = null; accion("Mensaje actualizado.") { backend.modificar(item.id, texto, it) } }
+                }) { Text("Guardar") } }, dismissButton = { TextButton(onClick = { editar = null }) { Text("Cancelar") } })
+        }
+        if (quitar != null || borrarTodo) AlertDialog(onDismissRequest = { quitar = null; borrarTodo = false },
+            title = { Text(if (borrarTodo) "Borrar historial" else "Eliminar mensaje") }, text = { Text("Esta acción elimina los mensajes seleccionados. ¿Quieres continuar?") },
+            confirmButton = { TextButton(onClick = {
+                val id = quitar?.id; val todo = borrarTodo
+                quitar = null; borrarTodo = false
+                accion("Mensajes eliminados.") { if (todo) backend.borrar(it) else backend.eliminar(id!!, it) }
+            }) { Text("Eliminar") } }, dismissButton = { TextButton(onClick = { quitar = null; borrarTodo = false }) { Text("Cancelar") } })
     }
 }
 
