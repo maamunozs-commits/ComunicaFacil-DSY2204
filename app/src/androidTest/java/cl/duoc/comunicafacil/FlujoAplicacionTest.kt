@@ -41,6 +41,8 @@ class FlujoAplicacionTest {
 
     @Test
     fun registroAccesoRecuperacionYComunicacion() {
+        org.junit.Assume.assumeTrue("Este flujo corresponde al modo local de la semana 5.",
+            com.google.firebase.FirebaseApp.getApps(regla.activity).isEmpty())
         regla.activity.getSharedPreferences("cuentas", Context.MODE_PRIVATE).edit().clear().commit()
         regla.activity.getSharedPreferences("sesion", Context.MODE_PRIVATE).edit().clear().commit()
         regla.activity.getSharedPreferences("mensajes", Context.MODE_PRIVATE).edit().clear().commit()

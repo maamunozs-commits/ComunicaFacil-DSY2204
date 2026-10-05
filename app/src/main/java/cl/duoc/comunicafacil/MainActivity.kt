@@ -107,6 +107,7 @@ class MainActivity : ComponentActivity() {
         }
 
         BackHandler(pantalla != "Login") {
+            if (ocupado) return@BackHandler
             if (pantalla == "Historial") navegar("Comunicar")
             else { backend.salir(); mensaje = ""; historial = emptyList(); navegar("Login") }
         }
@@ -135,8 +136,8 @@ class MainActivity : ComponentActivity() {
                                 if (error != null) aviso = error else navegar("Comunicar")
                             }
                         }, Modifier.fillMaxWidth().testTag("ingresar"), enabled = !ocupado) { Text("Ingresar") }
-                        TextButton(onClick = { navegar("Registro") }, Modifier.testTag("irRegistro")) { Text("Crear cuenta") }
-                        TextButton(onClick = { navegar("Recuperar contraseña") }, Modifier.testTag("irRecuperar")) { Text("Olvidé mi contraseña") }
+                        TextButton(onClick = { navegar("Registro") }, Modifier.testTag("irRegistro"), enabled = !ocupado) { Text("Crear cuenta") }
+                        TextButton(onClick = { navegar("Recuperar contraseña") }, Modifier.testTag("irRecuperar"), enabled = !ocupado) { Text("Olvidé mi contraseña") }
                         Text(if (backend.remoto) "Crea tu cuenta para conservar tus mensajes y acceder desde otro dispositivo."
                             else "Modo local de demostración. Se pueden registrar hasta 5 usuarios en este dispositivo.")
                         if (!backend.remoto) Text("Usuarios registrados: ${RegistroUsuarios(this@MainActivity).usuarios.filterNotNull().size}/5", Modifier.testTag("cantidad"))
@@ -166,7 +167,7 @@ class MainActivity : ComponentActivity() {
                                 }
                             }
                         }, Modifier.fillMaxWidth().testTag("registrar"), enabled = !ocupado) { Text("Registrar") }
-                        TextButton(onClick = { navegar("Login") }, Modifier.testTag("volver")) { Text("Volver al Login") }
+                        TextButton(onClick = { navegar("Login") }, Modifier.testTag("volver"), enabled = !ocupado) { Text("Volver al Login") }
                     }
                     "Recuperar contraseña" -> {
                         var correo by rememberSaveable { mutableStateOf("") }
@@ -187,7 +188,7 @@ class MainActivity : ComponentActivity() {
                                 else { navegar("Login"); aviso = if (backend.remoto) "Si el correo tiene una cuenta, recibirás un enlace de recuperación." else "Contraseña actualizada." }
                             }
                         }, Modifier.fillMaxWidth().testTag("recuperar"), enabled = !ocupado) { Text(if (backend.remoto) "Enviar enlace" else "Cambiar contraseña") }
-                        TextButton(onClick = { navegar("Login") }, Modifier.testTag("volver")) { Text("Volver al Login") }
+                        TextButton(onClick = { navegar("Login") }, Modifier.testTag("volver"), enabled = !ocupado) { Text("Volver al Login") }
                     }
                     "Comunicar" -> {
                         Text("Hola, ${usuario?.nombre.orEmpty()}")
@@ -234,7 +235,7 @@ class MainActivity : ComponentActivity() {
                             RadioButton(!grande, { grande = false }); Text("Normal")
                             RadioButton(grande, { grande = true }); Text("Grande")
                         }
-                        TextButton(onClick = { navegar("Historial") }, Modifier.testTag("irHistorial")) { Text("Ver historial (${historial.size})") }
+                        TextButton(onClick = { navegar("Historial") }, Modifier.testTag("irHistorial"), enabled = !ocupado) { Text("Ver historial (${historial.size})") }
                         TextButton(onClick = {
                             backend.salir(); mensaje = ""; historial = emptyList(); navegar("Login")
                         }, Modifier.testTag("salir"), enabled = !ocupado) { Text("Cerrar sesión") }
@@ -257,7 +258,7 @@ class MainActivity : ComponentActivity() {
                             HorizontalDivider()
                         }
                         OutlinedButton(onClick = { borrarTodo = true }, Modifier.testTag("borrarHistorial"), enabled = !ocupado) { Text("Borrar historial") }
-                        TextButton(onClick = { navegar("Comunicar") }, Modifier.testTag("volverComunicar")) { Text("Volver a comunicar") }
+                        TextButton(onClick = { navegar("Comunicar") }, Modifier.testTag("volverComunicar"), enabled = !ocupado) { Text("Volver a comunicar") }
                     }
                 }
             }

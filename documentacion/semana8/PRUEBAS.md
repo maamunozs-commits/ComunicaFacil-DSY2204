@@ -1,19 +1,23 @@
-# Pruebas de la semana 8
+# Resultados de la versión 1.2 con Firebase
 
-Fecha: 04/10/2026. Emulador AOSP Android 11, API 30, 720 × 1280. Código Kotlin y Compose, versión 1.1 (versionCode 2). Los datos son ficticios.
+Entorno: emulador AOSP Android 11 API 30, 720 × 1280, Firebase real en Spark. Ejecución local del 04/10/2026; los XML usan UTC y pueden indicar 05/10/2026.
 
-`assembleRelease testDebugUnitTest connectedDebugAndroidTest lintDebug` terminó con BUILD SUCCESSFUL. Los informes XML verifican 18 pruebas, sin fallos ni errores: 12 unitarias JUnit (0,029 s), cinco instrumentadas del backend local (0,162 s) y un flujo de interfaz Compose/AndroidJUnit4 (24,872 s). El flujo se repitió directamente con AndroidJUnitRunner para recuperar las capturas: OK (1 test), 24,237 s.
+| Suite | Aprobadas | Omitidas | Fallos | Tiempo |
+| --- | ---: | ---: | ---: | ---: |
+| ValidadorTest JUnit | 12 | 0 | 0 | 0,019 s |
+| BackendLocalTest | 5 | 0 | 0 | 0,144 s |
+| BackendFirebaseTest | 2 | 0 | 0 | 13,025 s |
+| FlujoFirebaseTest | 1 | 0 | 0 | 19,095 s |
+| FlujoAplicacionTest local anterior | 0 | 1 | 0 | 1,683 s |
 
-| Grupo | Verificaciones |
-| --- | --- |
-| JUnit | Normalización de correo, campos válidos, nombre corto, correo incompleto y con espacios, clave corta y su límite, PIN alfanumérico y longitud, mensaje vacío y límites de 1000/1001 caracteres. |
-| Backend local | CRUD sin sesión rechazado; crear, consultar, editar y eliminar; recarga de instancia; sesión persistida; cierre de sesión; aislamiento de cuentas; diez mensajes recientes; borrado completo; edición inválida y registros inexistentes. |
-| Interfaz | Cinco registros, duplicado y sexto rechazados; recuperación por PIN; clave anterior rechazada; mensaje, historial y recreación; cierre de sesión; nuevo acceso conserva historial; editar y eliminar desde diálogos; frases rápidas; ausencia de reconocimiento con aviso. |
+Total: 20 aprobadas, una omitida, cero fallos y cero errores. La suite instrumentada completa duró 35,038 s. Los XML están en `evidencias-firebase/`. La prueba UI local se omite expresamente porque requiere el PIN y el límite de cinco cuentas de S5, que no corresponden al servicio remoto.
 
-Lint: cero errores y 14 advertencias. Se refieren a target API anterior a la última disponible, versiones de dependencias, reglas de extracción de datos, icono de aplicación y sugerencias KTX. `allowBackup=false` continúa configurado. Las advertencias no se presentan como resueltas.
+Las pruebas remotas verifican CRUD real, logout/nuevo ingreso, conservación del ID y la fecha al editar, recarga y consulta desde una segunda instancia SDK con su propio Auth y caché. Las reglas rechazan operaciones sin sesión, acceso ajeno, texto de 1001 caracteres y cambio de fecha. La segunda cuenta puede crear y consultar sus propios mensajes. Las pruebas negativas se aíslan mediante una instancia SDK por prueba, para no contaminar el estado del flujo de interfaz.
 
-El APK release se instaló en el emulador y abrió Login correctamente. `apksigner verify --verbose --print-certs` confirmó la firma v2, un firmante, RSA 3072 bits. Certificado SHA-256: `457f725246a0dabd760b695913f60e37123062c8137a3bec84551553cae12b4a`. No utiliza el certificado debug.
+La UI comprueba registro con consentimiento, acceso, Mostrar, Historial, recreación de Activity, edición, eliminación confirmada, frase rápida, logout, nuevo acceso y solicitud de recuperación. La recepción del correo en una casilla real queda fuera de esta evidencia.
 
-Inicio en frío registrado mediante `adb shell am start -W`: debug 1725 ms; release 611 ms. Son muestras individuales del emulador y configuraciones distintas, sin equivalencia con un benchmark ni garantía de rendimiento. No se midieron FPS, consumo, latencia de Firebase ni tiempos de una transcripción real.
+Se repitió el mismo flujo sobre `app-release.apk` firmado: OK (1 test), 17,252 s. El APK test se firmó con el mismo certificado exclusivamente para esa validación y no se distribuye. Las capturas `capturas-firebase/01` a `11` provienen de esa ejecución release; `12` a `14` provienen de la consola real. No se fabricaron capturas mediante generación de imágenes. `contrato-compose.png` es una ilustración de las firmas Kotlin, distinta de las evidencias de funcionamiento.
 
-La activación de Firebase, pruebas de sus reglas en el servicio, acceso desde otro dispositivo y correo de recuperación permanecen pendientes. La salida de audio audible y la transcripción con micrófono requieren validación física. Los resultados locales no se atribuyen a Firebase. Capturas nuevas en `capturas/`; XML, logs de compilación, firma, instalación y arranque en `evidencias/`.
+Compilación debug/release aprobada. Firma APK v2 verificada, certificado SHA-256 `457f725246a0dabd760b695913f60e37123062c8137a3bec84551553cae12b4a`. Instalación release y arranque correctos. Inicio frío: debug 1072 ms y release 480 ms, una muestra por configuración; no permiten generalizar ni atribuir una mejora estadística. Lint: cero errores y 14 advertencias, registradas en XML.
+
+No se midieron FPS, memoria, latencia por petición ni audio físico. Se conserva la alternativa de texto. No se declara una prueba con dos teléfonos físicos ni una publicación en Google Play. Los archivos `capturas/` y `evidencias/` anteriores corresponden a la demostración local histórica, no a esta validación remota.

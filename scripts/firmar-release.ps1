@@ -10,5 +10,5 @@ try {
     & (Join-Path $PSScriptRoot '..\gradlew.bat') assembleRelease --console=plain
     if ($LASTEXITCODE -ne 0) { throw 'Falló la compilación release.' }
 } finally {
-    Remove-Item Env:\COMUNICAFACIL_STORE_PASSWORD,Env:\COMUNICAFACIL_KEY_PASSWORD -ErrorAction SilentlyContinue
+    Remove-Item Env:\COMUNICAFACIL_KEYSTORE,Env:\COMUNICAFACIL_STORE_PASSWORD,Env:\COMUNICAFACIL_KEY_PASSWORD -ErrorAction SilentlyContinue
 }

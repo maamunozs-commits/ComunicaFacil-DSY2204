@@ -1,16 +1,17 @@
 package cl.duoc.comunicafacil
 
 import android.content.Context
+import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.Source
 
-class BackendFirebase(contexto: Context) : Backend {
+class BackendFirebase(contexto: Context, app: FirebaseApp = FirebaseApp.getInstance()) : Backend {
     override val remoto = true
-    private val auth = FirebaseAuth.getInstance()
-    private val db = FirebaseFirestore.getInstance()
+    private val auth = FirebaseAuth.getInstance(app)
+    private val db = FirebaseFirestore.getInstance(app)
     private val sesion = contexto.getSharedPreferences("sesion", Context.MODE_PRIVATE)
     override fun actual(): Cuenta? = auth.currentUser?.let {
         Cuenta(it.uid, it.displayName.orEmpty(), it.email.orEmpty())

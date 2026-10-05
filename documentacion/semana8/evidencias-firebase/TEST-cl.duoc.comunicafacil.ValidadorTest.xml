@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="cl.duoc.comunicafacil.ValidadorTest" tests="12" skipped="0" failures="0" errors="0" timestamp="2026-10-04T23:55:24.212Z" hostname="DESKTOP-5UGD5K3" time="0.019">
+  <properties/>
+  <testcase name="normalizaCorreoSinCambiarDominio" classname="cl.duoc.comunicafacil.ValidadorTest" time="0.008"/>
+  <testcase name="rechazaPinDeCincoDigitos" classname="cl.duoc.comunicafacil.ValidadorTest" time="0.002"/>
+  <testcase name="rechazaPinConLetras" classname="cl.duoc.comunicafacil.ValidadorTest" time="0.0"/>
+  <testcase name="rechazaMensajeVacio" classname="cl.duoc.comunicafacil.ValidadorTest" time="0.0"/>
+  <testcase name="aceptaClaveDeSeisCaracteres" classname="cl.duoc.comunicafacil.ValidadorTest" time="0.0"/>
+  <testcase name="rechazaNombreCorto" classname="cl.duoc.comunicafacil.ValidadorTest" time="0.001"/>
+  <testcase name="aceptaRegistroValido" classname="cl.duoc.comunicafacil.ValidadorTest" time="0.0"/>
+  <testcase name="rechazaClaveCorta" classname="cl.duoc.comunicafacil.ValidadorTest" time="0.0"/>
+  <testcase name="rechazaCorreoConEspacios" classname="cl.duoc.comunicafacil.ValidadorTest" time="0.0"/>
+  <testcase name="rechazaCorreoSinDominio" classname="cl.duoc.comunicafacil.ValidadorTest" time="0.001"/>
+  <testcase name="rechazaMensajeMayorAlLimite" classname="cl.duoc.comunicafacil.ValidadorTest" time="0.0"/>
+  <testcase name="aceptaMensajeDeMilCaracteres" classname="cl.duoc.comunicafacil.ValidadorTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

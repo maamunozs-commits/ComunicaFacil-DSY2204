@@ -2,31 +2,37 @@
 
 Matías Muñoz · DSY2204 · 001A · Miguel Puebla · Duoc UC.
 
-La aplicación conserva el diseño y las funciones de texto, voz, frases, idioma y tamaño de la semana 5. La semana 8 agrega una interfaz de backend Kotlin, autenticación y persistencia Firebase preparadas, sesión con SharedPreferences y CRUD de mensajes desde Historial. El APK distribuido funciona en modo local de demostración; aún falta crear y configurar Firebase.
+La versión 1.2 funciona con Firebase Authentication y Cloud Firestore reales. Conserva Kotlin, Jetpack Compose, texto grande, TextToSpeech, reconocimiento de voz, frases rápidas, idioma y tamaño del proyecto S5. Agrega CRUD remoto de mensajes y datos básicos de sesión en SharedPreferences.
 
 ## Abrir y usar
 
-Abrir la raíz del proyecto en Android Studio, sincronizar Gradle con conexión a internet y ejecutar en Android 8 o superior. Se utiliza AGP 9.2.0, Gradle 9.4.1, compileSdk 37, targetSdk 36 y JDK 17 o superior (validado con el JBR de Android Studio). Las versiones exactas están en los archivos Gradle.
+Abrir la raíz en Android Studio, sincronizar Gradle con internet y ejecutar en Android 8 o superior. El proyecto ZIP de entrega incluye `app/google-services.json` del proyecto institucional `comunica-facil-s8-matias-4d9d5`. En Git ese archivo se omite: usar la copia del ZIP o descargarla desde Firebase Console con la cuenta maa.munozs@duocuc.cl. AGP 9.2.0, Gradle 9.4.1, compileSdk 37, targetSdk 36; JDK 17 o superior, validado con JBR de Android Studio.
 
-Crear una cuenta con nombre, correo, clave de seis caracteres o más y PIN de cuatro números. El modo local admite cinco cuentas por dispositivo; las cuentas existentes de la semana 5 se siguen leyendo. Al ingresar, escribir y pulsar Mostrar crea un mensaje. Historial permite consultar, editar, eliminar y borrar todos con confirmación. Se conservan los diez últimos mensajes por cuenta. Cerrar sesión conserva esos mensajes; el nuevo acceso los recarga. Recuperar contraseña mantiene el PIN en modo local. Las contraseñas locales siguen siendo SHA-256 para el ejercicio y no deben usarse con cuentas reales.
+Crear una cuenta con nombre, correo, contraseña de al menos seis caracteres y consentimiento. Ingresar, escribir un mensaje y pulsar Mostrar para guardarlo en Firestore. Historial consulta los diez últimos y permite editar, eliminar o borrar todo con confirmación. Cerrar sesión conserva los mensajes remotos. Recuperar contraseña solicita a Firebase un enlace por correo. No se exige PIN en el backend remoto. Las cuentas locales S5 no se migran automáticamente.
 
-La pantalla indica expresamente si está en modo local. Para activar el backend remoto, seguir [FIREBASE.md](FIREBASE.md). En ese modo las cuentas se autentican con FirebaseAuth, los mensajes usan Cloud Firestore y la recuperación envía un enlace por correo. Las preferencias no contienen contraseñas, PIN ni tokens Firebase; guardan los datos básicos de sesión. Las reglas incluidas autorizan únicamente al propietario.
+Se necesita conexión para confirmar operaciones. El progreso permanece mientras la escritura espera la respuesta del servidor. Sin configuración Firebase, el código utiliza BackendLocal y muestra expresamente la demostración local de cinco cuentas y PIN.
 
 ## Verificar y firmar
 
 ```powershell
+$env:JAVA_HOME='C:\Program Files\Android\Android Studio\jbr'
+$env:ANDROID_HOME=Join-Path $env:LOCALAPPDATA 'Android\Sdk'
 .\gradlew.bat testDebugUnitTest connectedDebugAndroidTest lintDebug
 .\scripts\firmar-release.ps1
 ```
 
-Las pruebas instrumentadas borran los datos de las cuentas ficticias en el emulador: usar un dispositivo dedicado. La clave release y la contraseña protegida para Windows permanecen fuera del repositorio en `%USERPROFILE%\.android\comunicafacil-firma`. `firma.xml` está protegido mediante DPAPI para la cuenta Windows que lo creó. Respaldar esa carpeta de forma privada: la misma clave se requiere para las actualizaciones. El script de firma requiere esa carpeta; otros equipos deben usar su propia clave o recibir un respaldo privado. No hay contraseñas ni keystores en el ZIP ni en Git.
+Las pruebas utilizan un emulador dedicado y cuentas ficticias @example.com. Los tests del backend remoto crean y eliminan sus propios datos; el flujo UI conserva una cuenta y un mensaje demostrativo para revisión. Las pruebas de reglas usan instancias SDK independientes y no comparten su estado con la UI. No usar estas credenciales de prueba para información personal.
 
-Resultados y límites en [PRUEBAS.md](PRUEBAS.md): 18 pruebas aprobadas y APK release instalado con firma v2 verificada. Firebase y audio físico requieren validación adicional.
+20 pruebas aprobadas y una prueba del antiguo flujo UI local omitida porque el APK está configurado para Firebase. El flujo remoto también pasó sobre el APK release firmado. Lint: cero errores y 14 advertencias. La voz audible, el micrófono en un teléfono físico y la recepción del enlace en una casilla real no se verificaron.
+
+La firma release usa la misma clave privada fuera del proyecto, en `%USERPROFILE%\.android\comunicafacil-firma`. `firma.xml` está protegido mediante DPAPI para la cuenta Windows propietaria. Respaldar esa carpeta de forma privada para futuras actualizaciones. El ZIP y Git no incluyen keystore ni contraseñas de firma. En otro equipo se puede compilar debug; para actualizar el release se necesita la clave original.
 
 ## Distribución
 
 Repositorio: https://github.com/maamunozs-commits/ComunicaFacil-DSY2204/tree/entrega-semana-8
 
-Release de demostración: https://github.com/maamunozs-commits/ComunicaFacil-DSY2204/releases/tag/v1.1.0-s8
+APK release con Firebase: https://github.com/maamunozs-commits/ComunicaFacil-DSY2204/releases/tag/v1.2.0-s8
 
-El informe institucional y el ZIP se entregan al profesor mediante AVA. La release distribuye el APK local y el código; no anuncia una versión con Firebase activado. No es una publicación en Google Play. Antes de una publicación en Google Play hay que revisar sus requisitos vigentes y adaptar el paquete y target API cuando corresponda.
+El ZIP académico incluye APK debug, APK release firmado, proyecto con configuración Firebase, Word, PDF y bundle Git. La presentación en AVA queda a cargo del estudiante. La publicación se realizó en GitHub Releases; no se ha publicado en Google Play.
+
+Configuración: [FIREBASE.md](FIREBASE.md). Resultados: [PRUEBAS.md](PRUEBAS.md).

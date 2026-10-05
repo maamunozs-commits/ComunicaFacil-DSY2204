@@ -1,0 +1,7 @@
+﻿Starting: Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] cmp=cl.duoc.comunicafacil/.MainActivity }
+Status: ok
+LaunchState: COLD
+Activity: cl.duoc.comunicafacil/.MainActivity
+TotalTime: 480
+WaitTime: 481
+Complete

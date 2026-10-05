@@ -1,0 +1,8 @@
+﻿
+cl.duoc.comunicafacil.FlujoFirebaseTest:.
+
+Time: 17.252
+
+OK (1 test)
+
+
